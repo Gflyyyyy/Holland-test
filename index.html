@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>霍兰德职业兴趣测试 (60题)</title>
+    <title>霍兰德职业兴趣测试 (二选一版 · 60题)</title>
     <style>
         /* --- 全局样式 --- */
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,13 +15,12 @@
             padding: 30px 15px;
         }
         .container {
-            max-width: 800px;
+            max-width: 820px;
             width: 100%;
             background: #ffffff;
             border-radius: 24px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.08);
             padding: 40px 35px;
-            transition: all 0.2s;
         }
         h1 {
             font-size: 28px;
@@ -43,35 +42,30 @@
             background: #f7fafc;
             border-radius: 16px;
             padding: 18px 22px;
-            margin-bottom: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: background 0.15s;
+            margin-bottom: 16px;
             border: 1px solid #edf2f7;
+            transition: background 0.15s;
         }
         .question-item:hover { background: #edf2f7; }
-        .question-text {
-            font-size: 16px;
-            color: #2d3748;
-            line-height: 1.5;
-            padding-right: 20px;
-            flex: 1;
-        }
         .question-number {
-            display: inline-block;
             font-weight: 600;
             color: #4a5568;
-            margin-right: 14px;
-            min-width: 32px;
+            margin-right: 6px;
+        }
+        .question-prompt {
+            font-size: 15px;
+            color: #2d3748;
+            margin-bottom: 12px;
+            font-weight: 500;
         }
         .options {
             display: flex;
-            gap: 8px;
-            flex-shrink: 0;
+            flex-wrap: wrap;
+            gap: 12px;
         }
         .options button {
-            padding: 8px 22px;
+            flex: 1 1 45%;
+            padding: 10px 18px;
             border: 2px solid #e2e8f0;
             background: white;
             border-radius: 40px;
@@ -79,19 +73,32 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.15s;
-            color: #4a5568;
-            min-width: 70px;
+            color: #2d3748;
+            text-align: left;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            min-width: 160px;
         }
-        .options button:hover { background: #edf2f7; }
-        .options button.selected-yes {
+        .options button .dimension-tag {
+            display: inline-block;
+            background: #e2e8f0;
+            border-radius: 20px;
+            padding: 0 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #2d3748;
+            margin-right: 4px;
+        }
+        .options button:hover { background: #edf2f7; border-color: #cbd5e0; }
+        .options button.selected {
             background: #2b6cb0;
             border-color: #2b6cb0;
             color: white;
         }
-        .options button.selected-no {
-            background: #e53e3e;
-            border-color: #e53e3e;
-            color: white;
+        .options button.selected .dimension-tag {
+            background: #ffffff80;
+            color: #1a202c;
         }
         .progress-section {
             margin: 30px 0 22px;
@@ -207,9 +214,7 @@
         }
         @media (max-width: 640px) {
             .container { padding: 20px 16px; }
-            .question-item { flex-direction: column; align-items: stretch; gap: 12px; }
-            .options { justify-content: flex-end; }
-            .options button { padding: 6px 16px; min-width: 60px; font-size: 14px; }
+            .options button { flex: 1 1 100%; }
             .actions { flex-direction: column; align-items: stretch; }
             .actions .left-buttons { justify-content: center; }
             .btn { width: 100%; justify-content: center; text-align: center; }
@@ -221,8 +226,8 @@
 <div class="container" id="app">
     <h1>🧭 霍兰德职业兴趣测试</h1>
     <div class="subhead">
-        共 60 题 · 根据第一印象作答 · 答案没有对错之分<strong>[reference:7][reference:8]</strong><br>
-        请根据自身情况回答 <strong>“是”</strong> 或 <strong>“否”</strong>。
+        共 60 题 · 每题从两个描述中选出更符合您的一项 · 凭第一感觉作答<br>
+        每个选项对应的霍兰德类型已标注，请放心选择，无对错之分。
     </div>
 
     <!-- 题目列表容器 -->
@@ -254,7 +259,7 @@
         <div class="status-msg" id="resultStatus"></div>
     </div>
     <div class="footer-note">
-        测试完成后点击 “提交结果” 将自动发送至 Dify Webhook
+        全部完成后点击 “提交结果” 将自动发送至 Dify Webhook
     </div>
 </div>
 
@@ -264,88 +269,128 @@
         const WEBHOOK_URL = 'https://your-dify-instance/webhook/your-unique-id';
         // -------------------------------------------------------------
 
-        // ----- 60 道霍兰德测试题 (每个维度 10 题) -----
-        // 题目来源参考公开的霍兰德职业兴趣测试量表[reference:9][reference:10]
-        const QUESTIONS = [
-            // R (现实型) —— 10题
-            "我喜欢动手修理东西[reference:11]",
-            "我喜欢户外工作[reference:12]",
-            "我喜欢操作机械、工具[reference:13]",
-            "我喜欢做体力或实操性工作[reference:14]",
-            "我喜欢运动、体能类活动[reference:15]",
-            "我喜欢种植、养殖、手工[reference:16]",
-            "我喜欢结构清晰、实际可操作的事[reference:17]",
-            "我不喜欢整天坐在办公室[reference:18]",
-            "我喜欢具体、看得见成果的工作[reference:19]",
-            "我擅长动手解决问题[reference:20]",
-            // I (研究型) —— 10题
-            "我喜欢思考、分析问题[reference:21]",
-            "我喜欢研究原理、规律[reference:22]",
-            "我喜欢阅读、学习新知识[reference:23]",
-            "我喜欢探索未知、解决难题[reference:24]",
-            "我喜欢观察、总结、归纳[reference:25]",
-            "我喜欢数据、逻辑推理[reference:26]",
-            "我喜欢独立思考，不喜欢被打扰[reference:27]",
-            "我喜欢探究事情为什么会发生[reference:28]",
-            "我喜欢写分析、研究报告[reference:29]",
-            "我对事物背后的逻辑很感兴趣[reference:30]",
-            // A (艺术型) —— 10题
-            "我喜欢创意、设计[reference:31]",
-            "我喜欢音乐、美术、写作[reference:32]",
-            "我喜欢自由、不喜欢死板规则[reference:33]",
-            "我喜欢表达自我、展现个性[reference:34]",
-            "我喜欢美感、氛围、情调[reference:35]",
-            "我想象力丰富[reference:36]",
-            "我喜欢新鲜、变化、不重复的工作[reference:37]",
-            "我情绪感受力强[reference:38]",
-            "我喜欢独特、与众不同[reference:39]",
-            "我不喜欢被条条框框限制[reference:40]",
-            // S (社会型) —— 10题
-            "我喜欢帮助别人[reference:41]",
-            "我喜欢倾听、安慰他人[reference:42]",
-            "我喜欢教育、指导、培训[reference:43]",
-            "我喜欢与人打交道、建立关系[reference:44]",
-            "我喜欢团队合作、和谐氛围[reference:45]",
-            "我善于理解他人感受[reference:46]",
-            "我喜欢公益、服务类工作[reference:47]",
-            "我愿意为他人付出[reference:48]",
-            "我善于沟通、化解矛盾[reference:49]",
-            "我喜欢关心、照顾他人[reference:50]",
-            // E (企业型) —— 10题
-            "我喜欢影响、说服他人[reference:51]",
-            "我喜欢管理、领导团队[reference:52]",
-            "我喜欢竞争、挑战目标[reference:53]",
-            "我喜欢承担责任、做决策[reference:54]",
-            "我喜欢组织、统筹安排[reference:55]",
-            "我喜欢权力、地位、成就感[reference:56]",
-            "我敢于表达、敢于担当[reference:57]",
-            "我喜欢创业、开拓、进取[reference:58]",
-            "我喜欢推动事情、掌控进度[reference:59]",
-            "我喜欢与人谈判、争取资源[reference:60]",
-            // C (常规型) —— 10题
-            "我喜欢稳定、规律的工作[reference:61]",
-            "我喜欢流程、制度、规则[reference:62]",
-            "我喜欢数据、档案、表格[reference:63]",
-            "我喜欢整洁、有序、规范[reference:64]",
-            "我喜欢细致、准确、不出错[reference:65]",
-            "我喜欢按部就班、不喜欢变动[reference:66]",
-            "我善于处理文字、资料[reference:67]",
-            "我喜欢可预期、安稳的环境[reference:68]",
-            "我做事严谨、有耐心[reference:69]",
-            "我遵守纪律、重视规则[reference:70]"
-        ];
+        // ----- 1. 定义六个维度的描述（每个维度10句，来自原有题库） -----
+        const DIMENSION_DESCRIPTIONS = {
+            'R': [  // 现实型
+                "喜欢动手修理东西",
+                "喜欢户外工作",
+                "喜欢操作机械、工具",
+                "喜欢做体力或实操性工作",
+                "喜欢运动、体能类活动",
+                "喜欢种植、养殖、手工",
+                "喜欢结构清晰、实际可操作的事",
+                "不喜欢整天坐在办公室",
+                "喜欢具体、看得见成果的工作",
+                "擅长动手解决问题"
+            ],
+            'I': [  // 研究型
+                "喜欢思考、分析问题",
+                "喜欢研究原理、规律",
+                "喜欢阅读、学习新知识",
+                "喜欢探索未知、解决难题",
+                "喜欢观察、总结、归纳",
+                "喜欢数据、逻辑推理",
+                "喜欢独立思考，不喜欢被打扰",
+                "喜欢探究事情为什么会发生",
+                "喜欢写分析、研究报告",
+                "对事物背后的逻辑很感兴趣"
+            ],
+            'A': [  // 艺术型
+                "喜欢创意、设计",
+                "喜欢音乐、美术、写作",
+                "喜欢自由、不喜欢死板规则",
+                "喜欢表达自我、展现个性",
+                "喜欢美感、氛围、情调",
+                "想象力丰富",
+                "喜欢新鲜、变化、不重复的工作",
+                "情绪感受力强",
+                "喜欢独特、与众不同",
+                "不喜欢被条条框框限制"
+            ],
+            'S': [  // 社会型
+                "喜欢帮助别人",
+                "喜欢倾听、安慰他人",
+                "喜欢教育、指导、培训",
+                "喜欢与人打交道、建立关系",
+                "喜欢团队合作、和谐氛围",
+                "善于理解他人感受",
+                "喜欢公益、服务类工作",
+                "愿意为他人付出",
+                "善于沟通、化解矛盾",
+                "喜欢关心、照顾他人"
+            ],
+            'E': [  // 企业型
+                "喜欢影响、说服他人",
+                "喜欢管理、领导团队",
+                "喜欢竞争、挑战目标",
+                "喜欢承担责任、做决策",
+                "喜欢组织、统筹安排",
+                "喜欢权力、地位、成就感",
+                "敢于表达、敢于担当",
+                "喜欢创业、开拓、进取",
+                "喜欢推动事情、掌控进度",
+                "喜欢与人谈判、争取资源"
+            ],
+            'C': [  // 常规型
+                "喜欢稳定、规律的工作",
+                "喜欢流程、制度、规则",
+                "喜欢数据、档案、表格",
+                "喜欢整洁、有序、规范",
+                "喜欢细致、准确、不出错",
+                "喜欢按部就班、不喜欢变动",
+                "善于处理文字、资料",
+                "喜欢可预期、安稳的环境",
+                "做事严谨、有耐心",
+                "遵守纪律、重视规则"
+            ]
+        };
 
-        // 维度映射：每个题目对应的维度索引
-        // 0:R, 1:I, 2:A, 3:S, 4:E, 5:C
-        const DIMENSION_MAP = [];
-        for (let i = 0; i < 60; i++) {
-            DIMENSION_MAP.push(Math.floor(i / 10));
+        const DIMENSION_ORDER = ['R', 'I', 'A', 'S', 'E', 'C'];
+        const DIMENSION_FULL = {
+            'R': '现实型', 'I': '研究型', 'A': '艺术型',
+            'S': '社会型', 'E': '企业型', 'C': '常规型'
+        };
+
+        // ----- 2. 生成60个题目（每对维度组合4题） -----
+        function generateQuestions() {
+            const questions = [];
+            // 生成所有维度对（共15对）
+            const pairs = [];
+            for (let i = 0; i < DIMENSION_ORDER.length; i++) {
+                for (let j = i + 1; j < DIMENSION_ORDER.length; j++) {
+                    pairs.push([DIMENSION_ORDER[i], DIMENSION_ORDER[j]]);
+                }
+            }
+
+            // 每个维度对生成4题，循环使用描述
+            for (const [dimA, dimB] of pairs) {
+                const descA = DIMENSION_DESCRIPTIONS[dimA];
+                const descB = DIMENSION_DESCRIPTIONS[dimB];
+                // 使用索引偏移，使每个描述被均衡使用
+                // 此处简单按顺序取，不同对之间会重复，但整体每个维度出现次数相等
+                for (let k = 0; k < 4; k++) {
+                    const idxA = k % descA.length;
+                    const idxB = k % descB.length;
+                    questions.push({
+                        textA: descA[idxA],
+                        dimA: dimA,
+                        textB: descB[idxB],
+                        dimB: dimB
+                    });
+                }
+            }
+            // 打乱顺序，避免维度对集中出现
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+            return questions;
         }
-        const DIMENSION_NAMES = ['R', 'I', 'A', 'S', 'E', 'C'];
-        const DIMENSION_FULL = ['现实型', '研究型', '艺术型', '社会型', '企业型', '常规型'];
 
-        // ----- 状态 -----
-        let answers = new Array(60).fill(null); // null / true / false
+        const QUESTIONS = generateQuestions(); // 长度为60
+
+        // ----- 3. 状态 -----
+        let answers = new Array(60).fill(null); // 存储选中的维度字母 (如 'R')
         let isSubmitted = false;
 
         // ----- DOM 引用 -----
@@ -363,17 +408,22 @@
         function renderQuestions() {
             let html = '';
             QUESTIONS.forEach((q, index) => {
-                const val = answers[index];
-                let yesClass = val === true ? 'selected-yes' : '';
-                let noClass = val === false ? 'selected-no' : '';
+                const selected = answers[index];
+                const isSelectedA = (selected === q.dimA);
+                const isSelectedB = (selected === q.dimB);
                 html += `
                     <div class="question-item" data-index="${index}">
-                        <span class="question-text">
-                            <span class="question-number">${index + 1}.</span> ${q}
-                        </span>
+                        <div class="question-number">${index + 1}.</div>
+                        <div class="question-prompt">您更倾向于：</div>
                         <div class="options">
-                            <button class="${yesClass}" data-index="${index}" data-value="true">是</button>
-                            <button class="${noClass}" data-index="${index}" data-value="false">否</button>
+                            <button class="${isSelectedA ? 'selected' : ''}" 
+                                    data-index="${index}" data-dim="${q.dimA}">
+                                <span class="dimension-tag">${q.dimA}</span> ${q.textA}
+                            </button>
+                            <button class="${isSelectedB ? 'selected' : ''}" 
+                                    data-index="${index}" data-dim="${q.dimB}">
+                                <span class="dimension-tag">${q.dimB}</span> ${q.textB}
+                            </button>
                         </div>
                     </div>
                 `;
@@ -399,21 +449,16 @@
 
         // ----- 计算霍兰德代码 -----
         function calculateHollandCode() {
-            const scores = [0, 0, 0, 0, 0, 0];
-            for (let i = 0; i < 60; i++) {
-                if (answers[i] === true) {
-                    scores[DIMENSION_MAP[i]] += 1;
-                }
+            const scoreMap = { 'R': 0, 'I': 0, 'A': 0, 'S': 0, 'E': 0, 'C': 0 };
+            for (const dim of answers) {
+                if (dim) scoreMap[dim] += 1;
             }
-            // 按得分降序排序，取前三个维度
-            const indexed = scores.map((score, idx) => ({ score, idx }));
-            indexed.sort((a, b) => b.score - a.score);
-            const top3 = indexed.slice(0, 3);
-            const code = top3.map(item => DIMENSION_NAMES[item.idx]).join('');
-            const details = top3.map(item => 
-                `${DIMENSION_NAMES[item.idx]} (${DIMENSION_FULL[item.idx]}: ${item.score}/10)`
-            ).join('、');
-            return { code, details, scores };
+            // 按得分降序排序
+            const sorted = DIMENSION_ORDER.slice().sort((a, b) => scoreMap[b] - scoreMap[a]);
+            const top3 = sorted.slice(0, 3);
+            const code = top3.join('');
+            const details = top3.map(d => `${d} (${DIMENSION_FULL[d]}: ${scoreMap[d]}分)`).join('、');
+            return { code, details, scores: scoreMap };
         }
 
         // ----- 显示结果 -----
@@ -422,7 +467,6 @@
             resultCode.textContent = code;
             resultDetail.innerHTML = `<strong>各维度得分：</strong> ${details}`;
             resultArea.classList.add('show');
-            // 滚动到结果区域
             resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
             return { code, details, scores };
         }
@@ -431,14 +475,7 @@
         async function sendToDify(code, scores) {
             const payload = {
                 holland_code: code,
-                scores: {
-                    R: scores[0],
-                    I: scores[1],
-                    A: scores[2],
-                    S: scores[3],
-                    E: scores[4],
-                    C: scores[5]
-                },
+                scores: scores,
                 timestamp: new Date().toISOString()
             };
 
@@ -469,26 +506,29 @@
             if (isSubmitted) return;
 
             const index = parseInt(btn.dataset.index, 10);
-            const value = btn.dataset.value === 'true';
+            const dim = btn.dataset.dim;
 
-            // 如果已选相同值，则取消选中 (toggle)
-            if (answers[index] === value) {
+            // 如果点击的是已经选中的选项，则取消选中（允许取消）
+            if (answers[index] === dim) {
                 answers[index] = null;
             } else {
-                answers[index] = value;
+                answers[index] = dim;
             }
 
-            // 更新 UI
+            // 更新当前题目的UI
             const item = btn.closest('.question-item');
-            const yesBtn = item.querySelector('button[data-value="true"]');
-            const noBtn = item.querySelector('button[data-value="false"]');
-            yesBtn.className = answers[index] === true ? 'selected-yes' : '';
-            noBtn.className = answers[index] === false ? 'selected-no' : '';
+            const btns = item.querySelectorAll('button[data-index]');
+            btns.forEach(b => {
+                const d = b.dataset.dim;
+                if (answers[index] === d) {
+                    b.classList.add('selected');
+                } else {
+                    b.classList.remove('selected');
+                }
+            });
 
             updateProgress();
             updateSubmitButton();
-
-            // 如果全部答完，自动提交？（可选，这里让用户手动点击）
         });
 
         // ----- 提交按钮 -----
