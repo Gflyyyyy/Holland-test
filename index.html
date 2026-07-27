@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>霍兰德职业兴趣测试 (60题)</title>
+    <style>
+        /* --- 全局样式 --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            padding: 30px 15px;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+            padding: 40px 35px;
+            transition: all 0.2s;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 6px;
+            letter-spacing: -0.3px;
+        }
+        .subhead {
+            color: #4a5568;
+            font-size: 16px;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 20px;
+            margin-bottom: 28px;
+            line-height: 1.6;
+        }
+        .subhead strong { color: #2b6cb0; }
+        .question-item {
+            background: #f7fafc;
+            border-radius: 16px;
+            padding: 18px 22px;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background 0.15s;
+            border: 1px solid #edf2f7;
+        }
+        .question-item:hover { background: #edf2f7; }
+        .question-text {
+            font-size: 16px;
+            color: #2d3748;
+            line-height: 1.5;
+            padding-right: 20px;
+            flex: 1;
+        }
+        .question-number {
+            display: inline-block;
+            font-weight: 600;
+            color: #4a5568;
+            margin-right: 14px;
+            min-width: 32px;
+        }
+        .options {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .options button {
+            padding: 8px 22px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 40px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: #4a5568;
+            min-width: 70px;
+        }
+        .options button:hover { background: #edf2f7; }
+        .options button.selected-yes {
+            background: #2b6cb0;
+            border-color: #2b6cb0;
+            color: white;
+        }
+        .options button.selected-no {
+            background: #e53e3e;
+            border-color: #e53e3e;
+            color: white;
+        }
+        .progress-section {
+            margin: 30px 0 22px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+        .progress-bar-bg {
+            flex: 1;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 40px;
+            overflow: hidden;
+        }
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: #2b6cb0;
+            border-radius: 40px;
+            transition: width 0.25s ease;
+        }
+        .progress-text {
+            font-size: 15px;
+            font-weight: 500;
+            color: #2d3748;
+            white-space: nowrap;
+        }
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            margin-top: 8px;
+        }
+        .actions .left-buttons { display: flex; gap: 12px; }
+        .btn {
+            padding: 12px 32px;
+            border: none;
+            border-radius: 60px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            background: #edf2f7;
+            color: #2d3748;
+        }
+        .btn-primary {
+            background: #2b6cb0;
+            color: white;
+            box-shadow: 0 4px 12px rgba(43,108,176,0.25);
+        }
+        .btn-primary:hover { background: #1a4f8b; transform: translateY(-1px); }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-success {
+            background: #38a169;
+            color: white;
+            box-shadow: 0 4px 12px rgba(56,161,105,0.25);
+        }
+        .btn-success:hover { background: #2f855a; transform: translateY(-1px); }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #cbd5e0;
+        }
+        .btn-outline:hover { background: #edf2f7; }
+        #resultArea {
+            margin-top: 28px;
+            padding: 24px 28px;
+            border-radius: 20px;
+            background: #ebf8ff;
+            border: 1px solid #bee3f8;
+            display: none;
+        }
+        #resultArea.show { display: block; }
+        #resultArea h3 {
+            font-size: 22px;
+            color: #2b6cb0;
+            margin-bottom: 6px;
+        }
+        #resultArea .code-badge {
+            display: inline-block;
+            font-size: 36px;
+            font-weight: 800;
+            letter-spacing: 4px;
+            background: #2b6cb0;
+            color: white;
+            padding: 6px 28px;
+            border-radius: 60px;
+            margin: 10px 0 12px;
+        }
+        #resultArea .detail {
+            color: #2d3748;
+            font-size: 15px;
+            line-height: 1.7;
+        }
+        #resultArea .status-msg {
+            margin-top: 12px;
+            font-weight: 500;
+            color: #2b6cb0;
+        }
+        .footer-note {
+            margin-top: 24px;
+            font-size: 14px;
+            color: #718096;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 20px;
+        }
+        @media (max-width: 640px) {
+            .container { padding: 20px 16px; }
+            .question-item { flex-direction: column; align-items: stretch; gap: 12px; }
+            .options { justify-content: flex-end; }
+            .options button { padding: 6px 16px; min-width: 60px; font-size: 14px; }
+            .actions { flex-direction: column; align-items: stretch; }
+            .actions .left-buttons { justify-content: center; }
+            .btn { width: 100%; justify-content: center; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="app">
+    <h1>🧭 霍兰德职业兴趣测试</h1>
+    <div class="subhead">
+        共 60 题 · 根据第一印象作答 · 答案没有对错之分<strong>[reference:7][reference:8]</strong><br>
+        请根据自身情况回答 <strong>“是”</strong> 或 <strong>“否”</strong>。
+    </div>
+
+    <!-- 题目列表容器 -->
+    <div id="questionsContainer"></div>
+
+    <!-- 进度条 -->
+    <div class="progress-section">
+        <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressFill"></div>
+        </div>
+        <span class="progress-text" id="progressText">0 / 60</span>
+    </div>
+
+    <!-- 操作按钮 -->
+    <div class="actions">
+        <div class="left-buttons">
+            <button class="btn btn-outline" id="resetBtn">🔄 重新测试</button>
+        </div>
+        <div>
+            <button class="btn btn-primary" id="submitBtn" disabled>📤 提交结果</button>
+        </div>
+    </div>
+
+    <!-- 结果显示区 -->
+    <div id="resultArea">
+        <h3>✨ 您的霍兰德代码</h3>
+        <div class="code-badge" id="resultCode">---</div>
+        <div class="detail" id="resultDetail"></div>
+        <div class="status-msg" id="resultStatus"></div>
+    </div>
+    <div class="footer-note">
+        测试完成后点击 “提交结果” 将自动发送至 Dify Webhook
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ---------- ★ 重要：请替换为你的 Dify Webhook URL ★ ----------
+        const WEBHOOK_URL = 'https://your-dify-instance/webhook/your-unique-id';
+        // -------------------------------------------------------------
+
+        // ----- 60 道霍兰德测试题 (每个维度 10 题) -----
+        // 题目来源参考公开的霍兰德职业兴趣测试量表[reference:9][reference:10]
+        const QUESTIONS = [
+            // R (现实型) —— 10题
+            "我喜欢动手修理东西[reference:11]",
+            "我喜欢户外工作[reference:12]",
+            "我喜欢操作机械、工具[reference:13]",
+            "我喜欢做体力或实操性工作[reference:14]",
+            "我喜欢运动、体能类活动[reference:15]",
+            "我喜欢种植、养殖、手工[reference:16]",
+            "我喜欢结构清晰、实际可操作的事[reference:17]",
+            "我不喜欢整天坐在办公室[reference:18]",
+            "我喜欢具体、看得见成果的工作[reference:19]",
+            "我擅长动手解决问题[reference:20]",
+            // I (研究型) —— 10题
+            "我喜欢思考、分析问题[reference:21]",
+            "我喜欢研究原理、规律[reference:22]",
+            "我喜欢阅读、学习新知识[reference:23]",
+            "我喜欢探索未知、解决难题[reference:24]",
+            "我喜欢观察、总结、归纳[reference:25]",
+            "我喜欢数据、逻辑推理[reference:26]",
+            "我喜欢独立思考，不喜欢被打扰[reference:27]",
+            "我喜欢探究事情为什么会发生[reference:28]",
+            "我喜欢写分析、研究报告[reference:29]",
+            "我对事物背后的逻辑很感兴趣[reference:30]",
+            // A (艺术型) —— 10题
+            "我喜欢创意、设计[reference:31]",
+            "我喜欢音乐、美术、写作[reference:32]",
+            "我喜欢自由、不喜欢死板规则[reference:33]",
+            "我喜欢表达自我、展现个性[reference:34]",
+            "我喜欢美感、氛围、情调[reference:35]",
+            "我想象力丰富[reference:36]",
+            "我喜欢新鲜、变化、不重复的工作[reference:37]",
+            "我情绪感受力强[reference:38]",
+            "我喜欢独特、与众不同[reference:39]",
+            "我不喜欢被条条框框限制[reference:40]",
+            // S (社会型) —— 10题
+            "我喜欢帮助别人[reference:41]",
+            "我喜欢倾听、安慰他人[reference:42]",
+            "我喜欢教育、指导、培训[reference:43]",
+            "我喜欢与人打交道、建立关系[reference:44]",
+            "我喜欢团队合作、和谐氛围[reference:45]",
+            "我善于理解他人感受[reference:46]",
+            "我喜欢公益、服务类工作[reference:47]",
+            "我愿意为他人付出[reference:48]",
+            "我善于沟通、化解矛盾[reference:49]",
+            "我喜欢关心、照顾他人[reference:50]",
+            // E (企业型) —— 10题
+            "我喜欢影响、说服他人[reference:51]",
+            "我喜欢管理、领导团队[reference:52]",
+            "我喜欢竞争、挑战目标[reference:53]",
+            "我喜欢承担责任、做决策[reference:54]",
+            "我喜欢组织、统筹安排[reference:55]",
+            "我喜欢权力、地位、成就感[reference:56]",
+            "我敢于表达、敢于担当[reference:57]",
+            "我喜欢创业、开拓、进取[reference:58]",
+            "我喜欢推动事情、掌控进度[reference:59]",
+            "我喜欢与人谈判、争取资源[reference:60]",
+            // C (常规型) —— 10题
+            "我喜欢稳定、规律的工作[reference:61]",
+            "我喜欢流程、制度、规则[reference:62]",
+            "我喜欢数据、档案、表格[reference:63]",
+            "我喜欢整洁、有序、规范[reference:64]",
+            "我喜欢细致、准确、不出错[reference:65]",
+            "我喜欢按部就班、不喜欢变动[reference:66]",
+            "我善于处理文字、资料[reference:67]",
+            "我喜欢可预期、安稳的环境[reference:68]",
+            "我做事严谨、有耐心[reference:69]",
+            "我遵守纪律、重视规则[reference:70]"
+        ];
+
+        // 维度映射：每个题目对应的维度索引
+        // 0:R, 1:I, 2:A, 3:S, 4:E, 5:C
+        const DIMENSION_MAP = [];
+        for (let i = 0; i < 60; i++) {
+            DIMENSION_MAP.push(Math.floor(i / 10));
+        }
+        const DIMENSION_NAMES = ['R', 'I', 'A', 'S', 'E', 'C'];
+        const DIMENSION_FULL = ['现实型', '研究型', '艺术型', '社会型', '企业型', '常规型'];
+
+        // ----- 状态 -----
+        let answers = new Array(60).fill(null); // null / true / false
+        let isSubmitted = false;
+
+        // ----- DOM 引用 -----
+        const container = document.getElementById('questionsContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const submitBtn = document.getElementById('submitBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const resultArea = document.getElementById('resultArea');
+        const resultCode = document.getElementById('resultCode');
+        const resultDetail = document.getElementById('resultDetail');
+        const resultStatus = document.getElementById('resultStatus');
+
+        // ----- 渲染题目 -----
+        function renderQuestions() {
+            let html = '';
+            QUESTIONS.forEach((q, index) => {
+                const val = answers[index];
+                let yesClass = val === true ? 'selected-yes' : '';
+                let noClass = val === false ? 'selected-no' : '';
+                html += `
+                    <div class="question-item" data-index="${index}">
+                        <span class="question-text">
+                            <span class="question-number">${index + 1}.</span> ${q}
+                        </span>
+                        <div class="options">
+                            <button class="${yesClass}" data-index="${index}" data-value="true">是</button>
+                            <button class="${noClass}" data-index="${index}" data-value="false">否</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+            updateProgress();
+            updateSubmitButton();
+        }
+
+        // ----- 更新进度 -----
+        function updateProgress() {
+            const answered = answers.filter(v => v !== null).length;
+            const pct = Math.round((answered / 60) * 100);
+            progressFill.style.width = pct + '%';
+            progressText.textContent = `${answered} / 60`;
+        }
+
+        // ----- 更新提交按钮状态 -----
+        function updateSubmitButton() {
+            const allAnswered = answers.every(v => v !== null);
+            submitBtn.disabled = !allAnswered || isSubmitted;
+        }
+
+        // ----- 计算霍兰德代码 -----
+        function calculateHollandCode() {
+            const scores = [0, 0, 0, 0, 0, 0];
+            for (let i = 0; i < 60; i++) {
+                if (answers[i] === true) {
+                    scores[DIMENSION_MAP[i]] += 1;
+                }
+            }
+            // 按得分降序排序，取前三个维度
+            const indexed = scores.map((score, idx) => ({ score, idx }));
+            indexed.sort((a, b) => b.score - a.score);
+            const top3 = indexed.slice(0, 3);
+            const code = top3.map(item => DIMENSION_NAMES[item.idx]).join('');
+            const details = top3.map(item => 
+                `${DIMENSION_NAMES[item.idx]} (${DIMENSION_FULL[item.idx]}: ${item.score}/10)`
+            ).join('、');
+            return { code, details, scores };
+        }
+
+        // ----- 显示结果 -----
+        function displayResult() {
+            const { code, details, scores } = calculateHollandCode();
+            resultCode.textContent = code;
+            resultDetail.innerHTML = `<strong>各维度得分：</strong> ${details}`;
+            resultArea.classList.add('show');
+            // 滚动到结果区域
+            resultArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return { code, details, scores };
+        }
+
+        // ----- 发送结果到 Dify Webhook -----
+        async function sendToDify(code, scores) {
+            const payload = {
+                holland_code: code,
+                scores: {
+                    R: scores[0],
+                    I: scores[1],
+                    A: scores[2],
+                    S: scores[3],
+                    E: scores[4],
+                    C: scores[5]
+                },
+                timestamp: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (response.ok) {
+                    resultStatus.textContent = '✅ 结果已成功发送至 Dify！';
+                    resultStatus.style.color = '#38a169';
+                } else {
+                    const errorText = await response.text();
+                    resultStatus.textContent = `⚠️ 发送失败 (HTTP ${response.status})：${errorText}`;
+                    resultStatus.style.color = '#e53e3e';
+                }
+            } catch (err) {
+                resultStatus.textContent = `❌ 网络错误：${err.message}`;
+                resultStatus.style.color = '#e53e3e';
+            }
+        }
+
+        // ----- 事件绑定 (委托) -----
+        container.addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-index]');
+            if (!btn) return;
+            if (isSubmitted) return;
+
+            const index = parseInt(btn.dataset.index, 10);
+            const value = btn.dataset.value === 'true';
+
+            // 如果已选相同值，则取消选中 (toggle)
+            if (answers[index] === value) {
+                answers[index] = null;
+            } else {
+                answers[index] = value;
+            }
+
+            // 更新 UI
+            const item = btn.closest('.question-item');
+            const yesBtn = item.querySelector('button[data-value="true"]');
+            const noBtn = item.querySelector('button[data-value="false"]');
+            yesBtn.className = answers[index] === true ? 'selected-yes' : '';
+            noBtn.className = answers[index] === false ? 'selected-no' : '';
+
+            updateProgress();
+            updateSubmitButton();
+
+            // 如果全部答完，自动提交？（可选，这里让用户手动点击）
+        });
+
+        // ----- 提交按钮 -----
+        submitBtn.addEventListener('click', async function() {
+            if (isSubmitted) return;
+            if (!answers.every(v => v !== null)) {
+                alert('请完成全部 60 道题后再提交。');
+                return;
+            }
+            isSubmitted = true;
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ 提交中...';
+
+            const { code, scores } = displayResult();
+
+            // 发送到 Dify
+            if (WEBHOOK_URL && WEBHOOK_URL !== 'https://your-dify-instance/webhook/your-unique-id') {
+                await sendToDify(code, scores);
+            } else {
+                resultStatus.textContent = 'ℹ️ 请先配置 WEBHOOK_URL 再提交。';
+                resultStatus.style.color = '#d69e2e';
+            }
+
+            submitBtn.textContent = '✅ 已提交';
+        });
+
+        // ----- 重置按钮 -----
+        resetBtn.addEventListener('click', function() {
+            if (isSubmitted) {
+                if (!confirm('重新测试将清除当前结果，确定继续吗？')) return;
+            }
+            answers = new Array(60).fill(null);
+            isSubmitted = false;
+            resultArea.classList.remove('show');
+            resultStatus.textContent = '';
+            submitBtn.disabled = true;
+            submitBtn.textContent = '📤 提交结果';
+            renderQuestions();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // ----- 初始化渲染 -----
+        renderQuestions();
+    })();
+</script>
+</body>
+</html>
