@@ -265,9 +265,13 @@
 
 <script>
     (function() {
-        // ---------- ★ 重要：请替换为你的 Dify Webhook URL ★ ----------
-        const WEBHOOK_URL = 'https://trigger.ai-plugin.io/triggers/webhook/dwARtD1agluGkubF8806Niua';
+        // ---------- ★ 重要：已替换为最新的 Webhook URL ★ ----------
+        const WEBHOOK_URL = 'https://trigger.ai-plugin.io/triggers/webhook/WYTqaJV7imd4U1Svlb86MX79';
         // -------------------------------------------------------------
+
+        // ----- 获取 URL 中的 session 参数（用于关联用户） -----
+        const urlParams = new URLSearchParams(window.location.search);
+        const SESSION_ID = urlParams.get('session') || 'default-session';
 
         // ----- 1. 定义六个维度的描述（每个维度10句，来自原有题库） -----
         const DIMENSION_DESCRIPTIONS = {
@@ -474,6 +478,7 @@
         // ----- 发送结果到 Dify Webhook -----
         async function sendToDify(code, scores) {
             const payload = {
+                session_id: SESSION_ID,   // 新增：关联用户会话
                 holland_code: code,
                 scores: scores,
                 timestamp: new Date().toISOString()
@@ -483,7 +488,9 @@
                 const response = await fetch(WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    mode: 'cors',           // 新增：明确要求跨域
+                    credentials: 'omit'     // 新增：不发送凭据
                 });
                 if (response.ok) {
                     resultStatus.textContent = '✅ 结果已成功发送至 Dify！';
