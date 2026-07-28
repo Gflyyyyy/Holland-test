@@ -265,8 +265,8 @@
 
 <script>
     (function() {
-        // ---------- ★ 重要：已替换为最新的 Webhook URL ★ ----------
-        const WEBHOOK_URL = 'https://trigger.ai-plugin.io/triggers/webhook/WYTqaJV7imd4U1Svlb86MX79';
+        // ---------- ★ 已替换为 CORS Anywhere 代理地址 ★ ----------
+        const WEBHOOK_URL = 'https://cors-anywhere.herokuapp.com/https://trigger.ai-plugin.io/triggers/webhook/WYTqaJV7imd4U1Svlb86MX79';
         // -------------------------------------------------------------
 
         // ----- 获取 URL 中的 session 参数（用于关联用户） -----
@@ -478,7 +478,7 @@
         // ----- 发送结果到 Dify Webhook -----
         async function sendToDify(code, scores) {
             const payload = {
-                session_id: SESSION_ID,   // 新增：关联用户会话
+                session_id: SESSION_ID,
                 holland_code: code,
                 scores: scores,
                 timestamp: new Date().toISOString()
@@ -489,8 +489,8 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload),
-                    mode: 'cors',           // 新增：明确要求跨域
-                    credentials: 'omit'     // 新增：不发送凭据
+                    mode: 'cors',
+                    credentials: 'omit'
                 });
                 if (response.ok) {
                     resultStatus.textContent = '✅ 结果已成功发送至 Dify！';
@@ -515,14 +515,12 @@
             const index = parseInt(btn.dataset.index, 10);
             const dim = btn.dataset.dim;
 
-            // 如果点击的是已经选中的选项，则取消选中（允许取消）
             if (answers[index] === dim) {
                 answers[index] = null;
             } else {
                 answers[index] = dim;
             }
 
-            // 更新当前题目的UI
             const item = btn.closest('.question-item');
             const btns = item.querySelectorAll('button[data-index]');
             btns.forEach(b => {
@@ -551,7 +549,6 @@
 
             const { code, scores } = displayResult();
 
-            // 发送到 Dify
             if (WEBHOOK_URL && WEBHOOK_URL !== 'https://your-dify-instance/webhook/your-unique-id') {
                 await sendToDify(code, scores);
             } else {
