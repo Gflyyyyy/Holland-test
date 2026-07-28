@@ -31,7 +31,6 @@
             overflow: hidden;
             background: #ffffff;
             height: 600px;
-            /* 固定高度，可按需调整 */
             position: relative;
         }
         .chat-container iframe {
@@ -73,7 +72,7 @@
             display: block;
         }
 
-        /* --- 测试内部样式 (原测试页面的样式) --- */
+        /* --- 测试内部样式 --- */
         .test-title {
             font-size: 28px;
             font-weight: 700;
@@ -303,10 +302,10 @@
 </head>
 <body>
     <div class="app-wrapper">
-        <!-- 1. AI 聊天区域（嵌入 Dify Chatflow） -->
+        <!-- 1. AI 聊天区域 (iframe) -->
         <div class="chat-container">
-            <!-- ★★★ 已嵌入你提供的 iframe ★★★ -->
             <iframe
+                id="chatIframe"
                 src="https://udify.app/chatbot/Yg60MCQHEgaTFdFk"
                 style="width: 100%; height: 100%; min-height: 700px"
                 frameborder="0"
@@ -314,22 +313,19 @@
             </iframe>
         </div>
 
-        <!-- 2. 开始测试按钮 -->
+        <!-- 2. 开始测试按钮（始终可见） -->
         <button id="showTestBtn">📝 开始测试</button>
 
         <!-- 3. 测试题目区域（默认隐藏） -->
         <div id="testContainer">
-            <!-- 以下是原测试页面的内容（精简了标题，因已在外层有标题感） -->
             <h1 class="test-title">🧭 霍兰德职业兴趣测试</h1>
             <div class="test-subhead">
                 共 60 题 · 每题从两个描述中选出更符合您的一项 · 凭第一感觉作答<br />
                 每个选项对应的霍兰德类型已标注，请放心选择，无对错之分。
             </div>
 
-            <!-- 题目列表容器 -->
             <div id="questionsContainer"></div>
 
-            <!-- 进度条 -->
             <div class="progress-section">
                 <div class="progress-bar-bg">
                     <div class="progress-bar-fill" id="progressFill"></div>
@@ -337,7 +333,6 @@
                 <span class="progress-text" id="progressText">0 / 60</span>
             </div>
 
-            <!-- 操作按钮 -->
             <div class="actions">
                 <div class="left-buttons">
                     <button class="btn btn-outline" id="resetBtn">🔄 重新测试</button>
@@ -347,7 +342,6 @@
                 </div>
             </div>
 
-            <!-- 结果显示区 -->
             <div id="resultArea">
                 <h3>✨ 您的霍兰德代码</h3>
                 <div class="code-badge" id="resultCode">---</div>
@@ -362,18 +356,33 @@
     </div>
 
     <script>
-        // ---- 以下为原测试页面的完整 JavaScript（已适配新容器） ----
         (function() {
-            // ---------- ★ 请确认 WEBHOOK_URL 为最新的代理地址 ★ ----------
+            // ----- 1. 获取或生成 session_id -----
+            const urlParams = new URLSearchParams(window.location.search);
+            let SESSION_ID = urlParams.get('session_id') || urlParams.get('session'); // 兼容两种参数名
+
+            if (!SESSION_ID) {
+                // 如果 URL 中没有 session 参数，自动生成一个 UUID
+                SESSION_ID = crypto.randomUUID ? crypto.randomUUID() :
+                    'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                        const r = Math.random() * 16 | 0,
+                            v = c === 'x' ? r : (r & 0x3 | 0x8);
+                        return v.toString(16);
+                    });
+                // 更新浏览器地址栏（不刷新页面），方便用户分享
+                const newUrl = window.location.origin + window.location.pathname + '?session_id=' + SESSION_ID;
+                window.history.replaceState({}, '', newUrl);
+            }
+
+            // ----- 2. 将 session_id 传递给 iframe（使用 session_id 参数名，与 Dify 自定义变量匹配） -----
+            const iframe = document.getElementById('chatIframe');
+            const iframeSrc = iframe.src.split('?')[0]; // 去掉原有的查询参数
+            iframe.src = iframeSrc + '?session_id=' + SESSION_ID;
+
+            // ----- 3. 测试页面逻辑（与原版一致） -----
             const WEBHOOK_URL =
                 'https://corsproxy.io/?https://trigger.ai-plugin.io/triggers/webhook/WYTqaJV7imd4U1Svlb86MX79';
-            // -------------------------------------------------------------
 
-            // ----- 获取 URL 中的 session 参数（用于关联用户） -----
-            const urlParams = new URLSearchParams(window.location.search);
-            const SESSION_ID = urlParams.get('session') || 'default-session';
-
-            // ----- 1. 定义六个维度的描述 -----
             const DIMENSION_DESCRIPTIONS = {
                 'R': [
                     "喜欢动手修理东西", "喜欢户外工作", "喜欢操作机械、工具", "喜欢做体力或实操性工作",
@@ -422,7 +431,6 @@
                 'C': '常规型'
             };
 
-            // ----- 2. 生成60个题目 -----
             function generateQuestions() {
                 const questions = [];
                 const pairs = [];
@@ -453,11 +461,9 @@
             }
             const QUESTIONS = generateQuestions();
 
-            // ----- 3. 状态 -----
             let answers = new Array(60).fill(null);
             let isSubmitted = false;
 
-            // ----- DOM 引用 -----
             const container = document.getElementById('questionsContainer');
             const progressFill = document.getElementById('progressFill');
             const progressText = document.getElementById('progressText');
@@ -468,7 +474,6 @@
             const resultDetail = document.getElementById('resultDetail');
             const resultStatus = document.getElementById('resultStatus');
 
-            // ----- 渲染题目 -----
             function renderQuestions() {
                 let html = '';
                 QUESTIONS.forEach((q, index) => {
@@ -497,7 +502,6 @@
                 updateSubmitButton();
             }
 
-            // ----- 更新进度 -----
             function updateProgress() {
                 const answered = answers.filter(v => v !== null).length;
                 const pct = Math.round((answered / 60) * 100);
@@ -505,13 +509,11 @@
                 progressText.textContent = `${answered} / 60`;
             }
 
-            // ----- 更新提交按钮 -----
             function updateSubmitButton() {
                 const allAnswered = answers.every(v => v !== null);
                 submitBtn.disabled = !allAnswered || isSubmitted;
             }
 
-            // ----- 计算霍兰德代码 -----
             function calculateHollandCode() {
                 const scoreMap = { 'R': 0, 'I': 0, 'A': 0, 'S': 0, 'E': 0, 'C': 0 };
                 for (const dim of answers) {
@@ -524,7 +526,6 @@
                 return { code, details, scores: scoreMap };
             }
 
-            // ----- 显示结果 -----
             function displayResult() {
                 const { code, details, scores } = calculateHollandCode();
                 resultCode.textContent = code;
@@ -534,7 +535,6 @@
                 return { code, details, scores };
             }
 
-            // ----- 发送到 Dify Webhook -----
             async function sendToDify(code, scores) {
                 const payload = {
                     session_id: SESSION_ID,
@@ -564,7 +564,6 @@
                 }
             }
 
-            // ----- 事件绑定 -----
             container.addEventListener('click', function(e) {
                 const btn = e.target.closest('button[data-index]');
                 if (!btn || isSubmitted) return;
@@ -589,7 +588,6 @@
                 updateSubmitButton();
             });
 
-            // ----- 提交按钮 -----
             submitBtn.addEventListener('click', async function() {
                 if (isSubmitted) return;
                 if (!answers.every(v => v !== null)) {
@@ -604,7 +602,6 @@
                 submitBtn.textContent = '✅ 已提交';
             });
 
-            // ----- 重置按钮 -----
             resetBtn.addEventListener('click', function() {
                 if (isSubmitted) {
                     if (!confirm('重新测试将清除当前结果，确定继续吗？')) return;
@@ -619,18 +616,14 @@
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
-            // ----- 按钮控制测试区域显示 -----
             const showBtn = document.getElementById('showTestBtn');
             const testContainer = document.getElementById('testContainer');
             showBtn.addEventListener('click', function() {
                 testContainer.classList.add('show');
-                showBtn.style.display = 'none';
-                // 滚动到测试区域
+                showBtn.style.display = 'none'; // 点击后按钮消失，避免重复点击
                 testContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                // 如果题目还未渲染则渲染（但已渲染，因为页面加载时已执行）
             });
 
-            // ----- 初始化渲染 -----
             renderQuestions();
         })();
     </script>
