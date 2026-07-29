@@ -386,7 +386,6 @@
             // ----- 1. 使用 localStorage 存储用户唯一 ID -----
             let SESSION_ID = localStorage.getItem('holland_session');
             if (!SESSION_ID) {
-                // 生成一个 UUID
                 SESSION_ID = crypto.randomUUID ? crypto.randomUUID() :
                     'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                         const r = Math.random() * 16 | 0,
@@ -641,7 +640,7 @@
                 testContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
 
-            // ★★★ 返回顶部按钮功能 ★★★
+            // 返回顶部按钮
             document.getElementById('backToTopBtn').addEventListener('click', function() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
@@ -650,23 +649,14 @@
         })();
     </script>
 
-    <!-- ===== 第二个 Chatflow 小窗嵌入（云端版本） ===== -->
+    <!-- ===== 第二个 Chatflow 小窗嵌入（云端版本 + 拖动功能） ===== -->
     <script>
       window.difyChatbotConfig = {
         token: 'gXvGYuCQcZB9kZin',
-        baseUrl: 'https://udify.app',   // 已替换为云端地址
-        inputs: {
-          // 如有需要，可在此定义开始节点的输入变量
-          // 例如: "holland_code": "RIA"
-        },
-        systemVariables: {
-          // user_id: 'YOU CAN DEFINE USER ID HERE',
-          // conversation_id: 'YOU CAN DEFINE CONVERSATION ID HERE, IT MUST BE A VALID UUID',
-        },
-        userVariables: {
-          // avatar_url: 'YOU CAN DEFINE USER AVATAR URL HERE',
-          // name: 'YOU CAN DEFINE USER NAME HERE',
-        },
+        baseUrl: 'https://udify.app',
+        inputs: {},
+        systemVariables: {},
+        userVariables: {},
       }
     </script>
     <script
@@ -683,6 +673,109 @@
         height: 40rem !important;
       }
     </style>
+
+    <!-- ===== 拖动功能脚本（独立于小窗，增强可拖动性） ===== -->
+    <script>
+      (function() {
+        // 等待小窗元素加载完成
+        function waitForElement(selector, callback, maxAttempts) {
+          var attempts = 0;
+          var interval = setInterval(function() {
+            var el = document.querySelector(selector);
+            if (el) {
+              clearInterval(interval);
+              callback(el);
+            } else if (++attempts > (maxAttempts || 50)) {
+              clearInterval(interval);
+              console.warn('小窗元素未找到，拖动功能未启用');
+            }
+          }, 200);
+        }
+
+        // 使元素可拖动
+        function makeDraggable(element) {
+          var posX = 0,
+            posY = 0,
+            mouseX = 0,
+            mouseY = 0;
+
+          // 让元素可以触发拖动（如果内部有iframe，需要拖动整个窗口）
+          element.style.cursor = 'move';
+
+          // 鼠标按下
+          element.addEventListener('mousedown', function(e) {
+            // 如果点击的是按钮或输入框，不启动拖动（防止干扰内部交互）
+            var target = e.target;
+            if (target.closest('button') || target.closest('input') || target.closest('textarea') || target.closest(
+                  'iframe')) {
+              return;
+            }
+            e.preventDefault();
+            // 获取当前窗口位置
+            var rect = element.getBoundingClientRect();
+            posX = rect.left;
+            posY = rect.top;
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+          });
+
+          function onMouseMove(e) {
+            var dx = e.clientX - mouseX;
+            var dy = e.clientY - mouseY;
+            // 使用 left/top 定位，避免与 bottom/right 冲突
+            element.style.left = (posX + dx) + 'px';
+            element.style.top = (posY + dy) + 'px';
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
+          }
+
+          function onMouseUp() {
+            document.removeEventListener('mousemove', onMouseMove);
+            document.removeEventListener('mouseup', onMouseUp);
+          }
+
+          // 移动端触摸支持
+          element.addEventListener('touchstart', function(e) {
+            var touch = e.touches[0];
+            var rect = element.getBoundingClientRect();
+            posX = rect.left;
+            posY = rect.top;
+            mouseX = touch.clientX;
+            mouseY = touch.clientY;
+            // 阻止滚动
+            e.preventDefault();
+
+            function onTouchMove(ev) {
+              var touchMove = ev.touches[0];
+              var dx = touchMove.clientX - mouseX;
+              var dy = touchMove.clientY - mouseY;
+              element.style.left = (posX + dx) + 'px';
+              element.style.top = (posY + dy) + 'px';
+              element.style.right = 'auto';
+              element.style.bottom = 'auto';
+            }
+
+            function onTouchEnd() {
+              document.removeEventListener('touchmove', onTouchMove);
+              document.removeEventListener('touchend', onTouchEnd);
+            }
+            document.addEventListener('touchmove', onTouchMove, { passive: false });
+            document.addEventListener('touchend', onTouchEnd);
+          }, { passive: false });
+        }
+
+        // 查找小窗窗口（Dify 生成的 ID 是 #dify-chatbot-bubble-window）
+        waitForElement('#dify-chatbot-bubble-window', function(windowEl) {
+          // 窗口元素需要先设置为可拖动（但它的父容器可能更适合）
+          // 实际上，Dify 的窗口在 #dify-chatbot-bubble-window 内，但拖动整个窗口容器可能会影响内部滚动。
+          // 我们拖动最外层的容器，即 #dify-chatbot-bubble-window 本身
+          makeDraggable(windowEl);
+        }, 60);
+      })();
+    </script>
     <!-- ===== 小窗嵌入结束 ===== -->
 
 </body>
