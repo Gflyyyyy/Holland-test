@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>霍兰德职业兴趣测试 + AI 推荐</title>
+    <title>霍兰德职业兴趣测试&AI生涯导航仪(大窗口为标准测试版,小窗口为专业分析版)</title>
     <style>
         /* --- 全局重置 --- */
         * {
@@ -371,7 +371,7 @@
                 <div class="code-badge" id="resultCode">---</div>
                 <div class="detail" id="resultDetail"></div>
                 <div class="status-msg" id="resultStatus"></div>
-                <!-- ★★★ 新增返回顶部按钮 ★★★ -->
+                <!-- ★★★ 返回顶部按钮 ★★★ -->
                 <button id="backToTopBtn">⬆ 返回顶部</button>
             </div>
             <div class="footer-note">
@@ -649,5 +649,41 @@
             renderQuestions();
         })();
     </script>
+
+    <!-- ===== 第二个 Chatflow 小窗嵌入 ===== -->
+    <script>
+      window.difyChatbotConfig = {
+        token: 'W2kTP1fHHvSfWoNw',
+        baseUrl: 'http://192.168.190.128',
+        inputs: {
+          // 如有需要，可在此定义开始节点的输入变量
+          // 例如: "holland_code": "RIA"
+        },
+        systemVariables: {
+          // user_id: 'YOU CAN DEFINE USER ID HERE',
+          // conversation_id: 'YOU CAN DEFINE CONVERSATION ID HERE, IT MUST BE A VALID UUID',
+        },
+        userVariables: {
+          // avatar_url: 'YOU CAN DEFINE USER AVATAR URL HERE',
+          // name: 'YOU CAN DEFINE USER NAME HERE',
+        },
+      }
+    </script>
+    <script
+      src="http://192.168.190.128/embed.min.js"
+      id="W2kTP1fHHvSfWoNw"
+      defer>
+    </script>
+    <style>
+      #dify-chatbot-bubble-button {
+        background-color: #1C64F2 !important;
+      }
+      #dify-chatbot-bubble-window {
+        width: 24rem !important;
+        height: 40rem !important;
+      }
+    </style>
+    <!-- ===== 第二个 Chatflow 小窗嵌入结束 ===== -->
+
 </body>
 </html>
