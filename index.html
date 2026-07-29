@@ -313,10 +313,10 @@
             </iframe>
         </div>
 
-        <!-- 2. 开始测试按钮（始终可见） -->
+        <!-- 2. 开始测试按钮 -->
         <button id="showTestBtn">📝 开始测试</button>
 
-        <!-- 3. 测试题目区域（默认隐藏） -->
+        <!-- 3. 测试题目区域 -->
         <div id="testContainer">
             <h1 class="test-title">🧭 霍兰德职业兴趣测试</h1>
             <div class="test-subhead">
@@ -357,29 +357,22 @@
 
     <script>
         (function() {
-            // ----- 1. 获取或生成 session_id -----
-            const urlParams = new URLSearchParams(window.location.search);
-            let SESSION_ID = urlParams.get('session_id') || urlParams.get('session'); // 兼容两种参数名
-
+            // ----- 1. 使用 localStorage 存储用户唯一 ID -----
+            let SESSION_ID = localStorage.getItem('holland_session');
             if (!SESSION_ID) {
-                // 如果 URL 中没有 session 参数，自动生成一个 UUID
+                // 生成一个 UUID
                 SESSION_ID = crypto.randomUUID ? crypto.randomUUID() :
                     'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                         const r = Math.random() * 16 | 0,
                             v = c === 'x' ? r : (r & 0x3 | 0x8);
                         return v.toString(16);
                     });
-                // 更新浏览器地址栏（不刷新页面），方便用户分享
-                const newUrl = window.location.origin + window.location.pathname + '?session_id=' + SESSION_ID;
-                window.history.replaceState({}, '', newUrl);
+                localStorage.setItem('holland_session', SESSION_ID);
             }
+            // 可选：将 SESSION_ID 传递给 iframe（但 Chatflow 已改为查询最新记录，所以非必需）
+            // 如果希望保留，可以设置 iframe.src 参数，但这里保持简单，不加参数
 
-            // ----- 2. 将 session_id 传递给 iframe（使用 session_id 参数名，与 Dify 自定义变量匹配） -----
-            const iframe = document.getElementById('chatIframe');
-            const iframeSrc = iframe.src.split('?')[0]; // 去掉原有的查询参数
-            iframe.src = iframeSrc + '?session_id=' + SESSION_ID;
-
-            // ----- 3. 测试页面逻辑（与原版一致） -----
+            // ----- 2. 测试逻辑（与之前完全一致） -----
             const WEBHOOK_URL =
                 'https://corsproxy.io/?https://trigger.ai-plugin.io/triggers/webhook/WYTqaJV7imd4U1Svlb86MX79';
 
@@ -620,7 +613,7 @@
             const testContainer = document.getElementById('testContainer');
             showBtn.addEventListener('click', function() {
                 testContainer.classList.add('show');
-                showBtn.style.display = 'none'; // 点击后按钮消失，避免重复点击
+                showBtn.style.display = 'none';
                 testContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
 
