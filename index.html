@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>霍兰德职业兴趣测试&amp;AI生涯导航仪 (大窗口为标准测试版，小窗口为专业分析版)</title>
+    <title>霍兰德职业兴趣测试 + AI 推荐</title>
     <style>
         /* --- 全局重置 --- */
         * {
@@ -326,11 +326,11 @@
 </head>
 <body>
     <div class="app-wrapper">
-        <!-- 1. AI 聊天区域 (iframe) - 已替换为新的 Chatflow -->
+        <!-- 1. AI 聊天区域 (iframe) -->
         <div class="chat-container">
             <iframe
                 id="chatIframe"
-                src="https://udify.app/chatbot/7fAYPnarUtZGX1SA"
+                src="https://udify.app/chatbot/Yg60MCQHEgaTFdFk"
                 style="width: 100%; height: 100%; min-height: 700px"
                 frameborder="0"
                 allow="microphone">
@@ -386,6 +386,7 @@
             // ----- 1. 使用 localStorage 存储用户唯一 ID -----
             let SESSION_ID = localStorage.getItem('holland_session');
             if (!SESSION_ID) {
+                // 生成一个 UUID
                 SESSION_ID = crypto.randomUUID ? crypto.randomUUID() :
                     'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                         const r = Math.random() * 16 | 0,
@@ -640,7 +641,7 @@
                 testContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
 
-            // 返回顶部按钮
+            // ★★★ 返回顶部按钮功能 ★★★
             document.getElementById('backToTopBtn').addEventListener('click', function() {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
@@ -649,202 +650,40 @@
         })();
     </script>
 
-    <!-- ===== 自定义可拖动小窗（第二个 Chatflow） ===== -->
-    <style>
-        /* 自定义小窗样式 */
-        #custom-chat-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 99999;
-            background-color: #1C64F2;
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(28, 100, 242, 0.4);
-            transition: background 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        #custom-chat-btn:hover {
-            background-color: #1a56d6;
-        }
-
-        #custom-chat-window {
-            position: fixed;
-            bottom: 100px;
-            right: 20px;
-            width: 400px;
-            height: 550px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-            z-index: 99998;
-            display: none;
-            overflow: hidden;
-            border: 1px solid #e2e8f0;
-            cursor: move;
-        }
-        #custom-chat-window iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            pointer-events: auto;
-        }
-
-        /* 小窗标题栏（拖动区域） */
-        #custom-chat-title {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 40px;
-            background: #f7fafc;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 16px;
-            font-weight: 600;
-            font-size: 14px;
-            color: #2d3748;
-            z-index: 10;
-            cursor: move;
-            user-select: none;
-        }
-        #custom-chat-title .close-btn {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #718096;
-            padding: 0 4px;
-        }
-        #custom-chat-title .close-btn:hover {
-            color: #e53e3e;
-        }
-
-        /* 移动端适配 */
-        @media (max-width: 640px) {
-            #custom-chat-window {
-                width: 90%;
-                height: 70vh;
-                right: 5%;
-                bottom: 80px;
-            }
-        }
-    </style>
-
-    <!-- 浮动按钮 -->
-    <button id="custom-chat-btn">💬 专业分析</button>
-
-    <!-- 自定义小窗 -->
-    <div id="custom-chat-window">
-        <!-- 标题栏 -->
-        <div id="custom-chat-title">
-            <span>🤖 专业分析助手</span>
-            <button class="close-btn" id="custom-chat-close">✕</button>
-        </div>
-        <!-- 小窗 iframe（第二个 Chatflow，用于专业分析） -->
-        <iframe src="https://udify.app/chatbot/Yg60MCQHEgaTFdFk"></iframe>
-    </div>
-
+    <!-- ===== 第二个 Chatflow 小窗嵌入（云端版本） ===== -->
     <script>
-        (function() {
-            var btn = document.getElementById('custom-chat-btn');
-            var windowEl = document.getElementById('custom-chat-window');
-            var closeBtn = document.getElementById('custom-chat-close');
-
-            // 打开/关闭小窗
-            btn.addEventListener('click', function() {
-                if (windowEl.style.display === 'none' || windowEl.style.display === '') {
-                    windowEl.style.display = 'block';
-                } else {
-                    windowEl.style.display = 'none';
-                }
-            });
-
-            closeBtn.addEventListener('click', function() {
-                windowEl.style.display = 'none';
-            });
-
-            // ----- 拖动功能（独立可控） -----
-            var titleBar = document.getElementById('custom-chat-title');
-            var isDragging = false;
-            var offsetX, offsetY;
-
-            titleBar.addEventListener('mousedown', function(e) {
-                if (e.target.classList.contains('close-btn')) return;
-                isDragging = true;
-                var rect = windowEl.getBoundingClientRect();
-                offsetX = e.clientX - rect.left;
-                offsetY = e.clientY - rect.top;
-                windowEl.style.cursor = 'grabbing';
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-                e.preventDefault();
-            });
-
-            function onMouseMove(e) {
-                if (!isDragging) return;
-                var left = e.clientX - offsetX;
-                var top = e.clientY - offsetY;
-                var maxX = window.innerWidth - windowEl.offsetWidth;
-                var maxY = window.innerHeight - windowEl.offsetHeight;
-                windowEl.style.left = Math.min(Math.max(left, 0), maxX) + 'px';
-                windowEl.style.top = Math.min(Math.max(top, 0), maxY) + 'px';
-                windowEl.style.right = 'auto';
-                windowEl.style.bottom = 'auto';
-            }
-
-            function onMouseUp() {
-                isDragging = false;
-                windowEl.style.cursor = 'move';
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            }
-
-            // 触摸支持（移动端）
-            titleBar.addEventListener('touchstart', function(e) {
-                if (e.target.classList.contains('close-btn')) return;
-                var touch = e.touches[0];
-                var rect = windowEl.getBoundingClientRect();
-                offsetX = touch.clientX - rect.left;
-                offsetY = touch.clientY - rect.top;
-                windowEl.style.cursor = 'grabbing';
-
-                function onTouchMove(ev) {
-                    var t = ev.touches[0];
-                    var left = t.clientX - offsetX;
-                    var top = t.clientY - offsetY;
-                    var maxX = window.innerWidth - windowEl.offsetWidth;
-                    var maxY = window.innerHeight - windowEl.offsetHeight;
-                    windowEl.style.left = Math.min(Math.max(left, 0), maxX) + 'px';
-                    windowEl.style.top = Math.min(Math.max(top, 0), maxY) + 'px';
-                    windowEl.style.right = 'auto';
-                    windowEl.style.bottom = 'auto';
-                    ev.preventDefault();
-                }
-
-                function onTouchEnd() {
-                    windowEl.style.cursor = 'move';
-                    document.removeEventListener('touchmove', onTouchMove);
-                    document.removeEventListener('touchend', onTouchEnd);
-                }
-                document.addEventListener('touchmove', onTouchMove, { passive: false });
-                document.addEventListener('touchend', onTouchEnd);
-            }, { passive: false });
-
-            // 初始化位置（位于右下角）
-            windowEl.style.right = '20px';
-            windowEl.style.bottom = '100px';
-        })();
+      window.difyChatbotConfig = {
+        token: 'gXvGYuCQcZB9kZin',
+        baseUrl: 'https://udify.app',   // 已替换为云端地址
+        inputs: {
+          // 如有需要，可在此定义开始节点的输入变量
+          // 例如: "holland_code": "RIA"
+        },
+        systemVariables: {
+          // user_id: 'YOU CAN DEFINE USER ID HERE',
+          // conversation_id: 'YOU CAN DEFINE CONVERSATION ID HERE, IT MUST BE A VALID UUID',
+        },
+        userVariables: {
+          // avatar_url: 'YOU CAN DEFINE USER AVATAR URL HERE',
+          // name: 'YOU CAN DEFINE USER NAME HERE',
+        },
+      }
     </script>
-    <!-- ===== 自定义小窗结束 ===== -->
+    <script
+      src="https://udify.app/embed.min.js"
+      id="gXvGYuCQcZB9kZin"
+      defer>
+    </script>
+    <style>
+      #dify-chatbot-bubble-button {
+        background-color: #1C64F2 !important;
+      }
+      #dify-chatbot-bubble-window {
+        width: 24rem !important;
+        height: 40rem !important;
+      }
+    </style>
+    <!-- ===== 小窗嵌入结束 ===== -->
 
 </body>
 </html>
