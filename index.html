@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>霍兰德职业兴趣测试&AI生涯导航仪(大窗口为标准测试版,小窗口为专业分析版)</title>
+    <title>霍兰德职业兴趣测试&amp;AI生涯导航仪 (大窗口为标准测试版，小窗口为专业分析版)</title>
     <style>
         /* --- 全局重置 --- */
         * {
@@ -326,11 +326,11 @@
 </head>
 <body>
     <div class="app-wrapper">
-        <!-- 1. AI 聊天区域 (iframe) -->
+        <!-- 1. AI 聊天区域 (iframe) - 已替换为新的 Chatflow -->
         <div class="chat-container">
             <iframe
                 id="chatIframe"
-                src="https://udify.app/chatbot/Yg60MCQHEgaTFdFk"
+                src="https://udify.app/chatbot/7fAYPnarUtZGX1SA"
                 style="width: 100%; height: 100%; min-height: 700px"
                 frameborder="0"
                 allow="microphone">
@@ -649,137 +649,202 @@
         })();
     </script>
 
-    <!-- ===== 第二个 Chatflow 小窗嵌入（云端版本 + 增强拖动功能） ===== -->
-    <script>
-      window.difyChatbotConfig = {
-        token: 'gXvGYuCQcZB9kZin',
-        baseUrl: 'https://udify.app',
-        inputs: {},
-        systemVariables: {},
-        userVariables: {},
-      }
-    </script>
-    <script
-      src="https://udify.app/embed.min.js"
-      id="gXvGYuCQcZB9kZin"
-      defer>
-    </script>
+    <!-- ===== 自定义可拖动小窗（第二个 Chatflow） ===== -->
     <style>
-      #dify-chatbot-bubble-button {
-        background-color: #1C64F2 !important;
-      }
-      #dify-chatbot-bubble-window {
-        width: 24rem !important;
-        height: 40rem !important;
-      }
+        /* 自定义小窗样式 */
+        #custom-chat-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 99999;
+            background-color: #1C64F2;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(28, 100, 242, 0.4);
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        #custom-chat-btn:hover {
+            background-color: #1a56d6;
+        }
+
+        #custom-chat-window {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            width: 400px;
+            height: 550px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            z-index: 99998;
+            display: none;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            cursor: move;
+        }
+        #custom-chat-window iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            pointer-events: auto;
+        }
+
+        /* 小窗标题栏（拖动区域） */
+        #custom-chat-title {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40px;
+            background: #f7fafc;
+            border-bottom: 1px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #2d3748;
+            z-index: 10;
+            cursor: move;
+            user-select: none;
+        }
+        #custom-chat-title .close-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #718096;
+            padding: 0 4px;
+        }
+        #custom-chat-title .close-btn:hover {
+            color: #e53e3e;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 640px) {
+            #custom-chat-window {
+                width: 90%;
+                height: 70vh;
+                right: 5%;
+                bottom: 80px;
+            }
+        }
     </style>
 
-    <!-- ===== 增强拖动功能（带调试日志） ===== -->
+    <!-- 浮动按钮 -->
+    <button id="custom-chat-btn">💬 专业分析</button>
+
+    <!-- 自定义小窗 -->
+    <div id="custom-chat-window">
+        <!-- 标题栏 -->
+        <div id="custom-chat-title">
+            <span>🤖 专业分析助手</span>
+            <button class="close-btn" id="custom-chat-close">✕</button>
+        </div>
+        <!-- 小窗 iframe（第二个 Chatflow，用于专业分析） -->
+        <iframe src="https://udify.app/chatbot/Yg60MCQHEgaTFdFk"></iframe>
+    </div>
+
     <script>
-      (function() {
-        console.log('[拖动] 小窗拖动脚本已加载');
+        (function() {
+            var btn = document.getElementById('custom-chat-btn');
+            var windowEl = document.getElementById('custom-chat-window');
+            var closeBtn = document.getElementById('custom-chat-close');
 
-        // 等待元素出现
-        function waitForElement(selector, callback, timeout) {
-          var startTime = Date.now();
-          var interval = setInterval(function() {
-            var el = document.querySelector(selector);
-            if (el) {
-              console.log('[拖动] 找到元素:', selector);
-              clearInterval(interval);
-              callback(el);
-            } else if (Date.now() - startTime > (timeout || 10000)) {
-              clearInterval(interval);
-              console.warn('[拖动] 元素未找到，超时:', selector);
-            }
-          }, 300);
-        }
+            // 打开/关闭小窗
+            btn.addEventListener('click', function() {
+                if (windowEl.style.display === 'none' || windowEl.style.display === '') {
+                    windowEl.style.display = 'block';
+                } else {
+                    windowEl.style.display = 'none';
+                }
+            });
 
-        // 使元素可拖动
-        function makeDraggable(element) {
-          console.log('[拖动] 正在为元素添加拖动功能', element);
-          var posX = 0,
-            posY = 0,
-            mouseX = 0,
-            mouseY = 0;
+            closeBtn.addEventListener('click', function() {
+                windowEl.style.display = 'none';
+            });
 
-          // 强制固定定位，并设置足够高的 z-index
-          element.style.position = 'fixed';
-          element.style.zIndex = '99999';
-          element.style.touchAction = 'none'; // 防止触摸滚动干扰
+            // ----- 拖动功能（独立可控） -----
+            var titleBar = document.getElementById('custom-chat-title');
+            var isDragging = false;
+            var offsetX, offsetY;
 
-          // 鼠标按下
-          element.addEventListener('mousedown', function(e) {
-            // 如果点击的是按钮、输入框或 iframe 内部，不启动拖动
-            var target = e.target;
-            if (target.closest('button') || target.closest('input') || target.closest('textarea') || target.closest(
-                'iframe')) {
-              return;
-            }
-            e.preventDefault();
-            var rect = element.getBoundingClientRect();
-            posX = rect.left;
-            posY = rect.top;
-            mouseX = e.clientX;
-            mouseY = e.clientY;
+            titleBar.addEventListener('mousedown', function(e) {
+                if (e.target.classList.contains('close-btn')) return;
+                isDragging = true;
+                var rect = windowEl.getBoundingClientRect();
+                offsetX = e.clientX - rect.left;
+                offsetY = e.clientY - rect.top;
+                windowEl.style.cursor = 'grabbing';
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+                e.preventDefault();
+            });
 
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
-          });
-
-          function onMouseMove(e) {
-            var dx = e.clientX - mouseX;
-            var dy = e.clientY - mouseY;
-            element.style.left = (posX + dx) + 'px';
-            element.style.top = (posY + dy) + 'px';
-            element.style.right = 'auto';
-            element.style.bottom = 'auto';
-          }
-
-          function onMouseUp() {
-            document.removeEventListener('mousemove', onMouseMove);
-            document.removeEventListener('mouseup', onMouseUp);
-          }
-
-          // 触摸支持
-          element.addEventListener('touchstart', function(e) {
-            var touch = e.touches[0];
-            var rect = element.getBoundingClientRect();
-            posX = rect.left;
-            posY = rect.top;
-            mouseX = touch.clientX;
-            mouseY = touch.clientY;
-            // 阻止滚动
-            e.preventDefault();
-
-            function onTouchMove(ev) {
-              var touchMove = ev.touches[0];
-              var dx = touchMove.clientX - mouseX;
-              var dy = touchMove.clientY - mouseY;
-              element.style.left = (posX + dx) + 'px';
-              element.style.top = (posY + dy) + 'px';
-              element.style.right = 'auto';
-              element.style.bottom = 'auto';
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                var left = e.clientX - offsetX;
+                var top = e.clientY - offsetY;
+                var maxX = window.innerWidth - windowEl.offsetWidth;
+                var maxY = window.innerHeight - windowEl.offsetHeight;
+                windowEl.style.left = Math.min(Math.max(left, 0), maxX) + 'px';
+                windowEl.style.top = Math.min(Math.max(top, 0), maxY) + 'px';
+                windowEl.style.right = 'auto';
+                windowEl.style.bottom = 'auto';
             }
 
-            function onTouchEnd() {
-              document.removeEventListener('touchmove', onTouchMove);
-              document.removeEventListener('touchend', onTouchEnd);
+            function onMouseUp() {
+                isDragging = false;
+                windowEl.style.cursor = 'move';
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
             }
-            document.addEventListener('touchmove', onTouchMove, { passive: false });
-            document.addEventListener('touchend', onTouchEnd);
-          }, { passive: false });
 
-          console.log('[拖动] 拖动功能已添加');
-        }
+            // 触摸支持（移动端）
+            titleBar.addEventListener('touchstart', function(e) {
+                if (e.target.classList.contains('close-btn')) return;
+                var touch = e.touches[0];
+                var rect = windowEl.getBoundingClientRect();
+                offsetX = touch.clientX - rect.left;
+                offsetY = touch.clientY - rect.top;
+                windowEl.style.cursor = 'grabbing';
 
-        // 等待小窗窗口出现（Dify 生成的 ID）
-        waitForElement('#dify-chatbot-bubble-window', function(windowEl) {
-          makeDraggable(windowEl);
-        }, 15000);
-      })();
+                function onTouchMove(ev) {
+                    var t = ev.touches[0];
+                    var left = t.clientX - offsetX;
+                    var top = t.clientY - offsetY;
+                    var maxX = window.innerWidth - windowEl.offsetWidth;
+                    var maxY = window.innerHeight - windowEl.offsetHeight;
+                    windowEl.style.left = Math.min(Math.max(left, 0), maxX) + 'px';
+                    windowEl.style.top = Math.min(Math.max(top, 0), maxY) + 'px';
+                    windowEl.style.right = 'auto';
+                    windowEl.style.bottom = 'auto';
+                    ev.preventDefault();
+                }
+
+                function onTouchEnd() {
+                    windowEl.style.cursor = 'move';
+                    document.removeEventListener('touchmove', onTouchMove);
+                    document.removeEventListener('touchend', onTouchEnd);
+                }
+                document.addEventListener('touchmove', onTouchMove, { passive: false });
+                document.addEventListener('touchend', onTouchEnd);
+            }, { passive: false });
+
+            // 初始化位置（位于右下角）
+            windowEl.style.right = '20px';
+            windowEl.style.bottom = '100px';
+        })();
     </script>
-    <!-- ===== 小窗嵌入结束 ===== -->
+    <!-- ===== 自定义小窗结束 ===== -->
 
 </body>
 </html>
