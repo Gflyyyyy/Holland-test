@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>霍兰德职业兴趣测试&amp;AI生涯导航仪 (大窗口为标准测试版，小窗口为专业分析版)</title>
     <style>
         /* --- 全局重置 --- */
@@ -24,20 +24,22 @@
             gap: 20px;
         }
 
-        /* --- 聊天区域 (iframe) --- */
+        /* --- 聊天区域 (iframe) - 优化 iOS 显示 --- */
         .chat-container {
             border: 1px solid #e2e8f0;
             border-radius: 16px;
             overflow: hidden;
             background: #ffffff;
-            height: 600px;
+            height: 600px;                     /* 固定高度 */
             position: relative;
+            -webkit-overflow-scrolling: touch; /* iOS 平滑滚动 */
         }
         .chat-container iframe {
             width: 100%;
             height: 100%;
             border: none;
             display: block;
+            min-height: 600px;                /* 确保内容完整 */
         }
 
         /* --- 开始测试按钮 --- */
@@ -297,7 +299,10 @@
         /* 移动端适配 */
         @media (max-width: 640px) {
             .chat-container {
-                height: 450px;
+                height: 450px;      /* 移动端适当降低高度 */
+            }
+            .chat-container iframe {
+                min-height: 450px;
             }
             #testContainer {
                 padding: 20px 16px;
@@ -326,14 +331,14 @@
 </head>
 <body>
     <div class="app-wrapper">
-        <!-- 1. AI 聊天区域 (iframe) - 已替换为最新的大窗口地址 -->
+        <!-- 1. AI 聊天区域 (iframe) -->
         <div class="chat-container">
             <iframe
                 id="chatIframe"
                 src="https://udify.app/chatbot/7fAYPnarUtZGX1SA"
-                style="width: 100%; height: 100%; min-height: 700px"
-                frameborder="0"
-                allow="microphone">
+                style="width: 100%; height: 100%; border: none; display: block;"
+                allow="microphone"
+                scrolling="yes">
             </iframe>
         </div>
 
@@ -386,7 +391,6 @@
             // ----- 1. 使用 localStorage 存储用户唯一 ID -----
             let SESSION_ID = localStorage.getItem('holland_session');
             if (!SESSION_ID) {
-                // 生成一个 UUID
                 SESSION_ID = crypto.randomUUID ? crypto.randomUUID() :
                     'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
                         const r = Math.random() * 16 | 0,
